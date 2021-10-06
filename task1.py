@@ -115,9 +115,91 @@ def fetchAPOD2(year,month):
     js={"status": 404,"message": "image/video not found"}
     return js
 
+@app.route('/nasa/earth-poly-image/<date>')
+def fetch(date):
+  URL_APOD = "https://epic.gsfc.nasa.gov/api/natural"
+  sdate = date
+  try:
+    params = {
+        'api_key':apiKey,
+        'date':sdate,
+    }
+    response = requests.get(URL_APOD,params=params).json()
+    li=[]
+    for i in response:
+          a=i['centroid_coordinates']['lat']
+          b=i['centroid_coordinates']['lon']
+          if a in range(10,40) and b in range(120,161):
+            dic={'identifier':i['identifier'],'caption':i['caption'],'image':i['image'],'date':i['date'],'latitude':i['centroid_coordinates']['lat'],'longitude':i['centroid_coordinates']['lon']}
+            li.append(dic)
+    return str(li)
+  except:
+    js={"status": 404,"message": "image/video not found"}
+    return js
+
+
+
+@app.route('/weather/city/<name>')
+def city(name):
+  try:
+    BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
+    API_KEY = "fb725cc2dc004d6ab823186d2c27fab1"
+    # upadting the URL
+    URL_APOD = BASE_URL + "q=" + name + "&appid=" + API_KEY
+    # HTTP request
+    response = requests.get(URL_APOD).json()
+    #pp.pprint(response)
+    dic={'country':response['sys']['country'],'name':response['name'],'temp':response['main']['temp']}
+    return dic
+  except:
+    js={
+    "status": 404,
+    "message": "weather data not found"
+    }
+    return js
+
+
+@app.route('/weather/search/<lat>/<lon>')
+def latitude(lat,lon):
+  try:
+    BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
+    API_KEY = "0d8681b69560b5cdd6257184d3c7fc14"
+    # upadting the URL
+    URL_APOD = BASE_URL + "appid=" + API_KEY + "&lat=" + str(lat) + "&lon=" + str(lon)
+    # HTTP request
+    response = requests.get(URL_APOD).json()
+    #pp.pprint(response)
+    dic={'country':response['sys']['country'],'name':response['name'],'temp':response['main']['temp'],'min_temp':response['main']['temp_min'],'max_temp':response['main']['temp_max'],'latitude':response['coord']['lat'],'longitude':response['coord']['lon']}
+    return dic
+  except:
+    js={
+    "status": 404,
+    "message": "weather data not found"
+    }
+    return js
+
+@app.route('/weather/search/<pin_code>')
+def pincode(pin_code):
+  try:
+    API_key = "0d8681b69560b5cdd6257184d3c7fc14"
+    base_url = "http://api.openweathermap.org/data/2.5/weather?"
+    
+    Final_url = base_url + "appid=" + API_key + "&zip=" + pin_code
+    
+    response = requests.get(Final_url).json()
+    
+    print("\nCurrent Weather Data Of " + pin_code +":\n")
+    dic={'country':response['sys']['country'],'name':response['name'],'temp':response['main']['temp'],'min_temp':response['main']['temp_min'],'max_temp':response['main']['temp_max'],'latitude':response['coord']['lat'],'longitude':response['coord']['lon']}
+    return dic
+  except:
+    js={
+    "status": 404,
+    "message": "weather data not found"
+    }
+    return js
+
+
+
 
 if __name__=='__main__':
   app.run(debug=True)
-
-
-
