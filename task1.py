@@ -117,7 +117,7 @@ def fetchAPOD2(year,month):
 
 @app.route('/nasa/earth-poly-image/<date>')
 def fetch(date):
-  URL_APOD = "https://epic.gsfc.nasa.gov/api/natural"
+  URL_APOD = "https://epic.gsfc.nasa.gov/api/images.php"
   sdate = date
   try:
     params = {
@@ -127,8 +127,8 @@ def fetch(date):
     response = requests.get(URL_APOD,params=params).json()
     li=[]
     for i in response:
-          a=i['centroid_coordinates']['lat']
-          b=i['centroid_coordinates']['lon']
+          a=int(i['centroid_coordinates']['lat'])
+          b=int(i['centroid_coordinates']['lon'])
           if a in range(10,40) and b in range(120,161):
             dic={'identifier':i['identifier'],'caption':i['caption'],'image':i['image'],'date':i['date'],'latitude':i['centroid_coordinates']['lat'],'longitude':i['centroid_coordinates']['lon']}
             li.append(dic)
