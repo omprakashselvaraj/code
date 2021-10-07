@@ -198,8 +198,10 @@ def pincode(pin_code):
     }
     return js
 
-
-
+@app.route('/')
+def go():
+  js={"data":"codeCrunch21 -> 06-oct-21"}
+  return js
 
 if __name__=='__main__':
   app.run(debug=True)
