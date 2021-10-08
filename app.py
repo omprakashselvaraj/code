@@ -1,3 +1,4 @@
+from http.client import responses
 from logging import debug
 import requests
 from flask import Flask, jsonify, request
@@ -196,6 +197,66 @@ def task5():
 def start():
   js={"data":"codeCrunch21 -> 06-oct-21"}
   return js
+
+
+
+
+#------------------------------------------------SECTION 4-----------------------------------
+
+@app.route('/crypto/coins',methods=['GET'])
+def getcoins():
+  try:
+    url="https://api.coinpaprika.com/v1/coins"
+    response = requests.get(url).json()
+    li=[]
+    for i in response:
+      if i['type']=='coin':
+        dic={'id':i['id'],'name':i['name'],'symbol':i['symbol'],'type':i['type']}
+        li.append(dic)
+    return str(li)
+  except:
+        return jsonify({"status": 404,"message": "coin/token not found"})
+
+@app.route('/crypto/tokens',methods=['GET'])
+def gettoken():
+  try:
+    url="https://api.coinpaprika.com/v1/coins"
+    response = requests.get(url).json()
+    li=[]
+    for i in response:
+      if i['type']=='token':
+        dic={'id':i['id'],'name':i['name'],'symbol':i['symbol'],'type':i['type']}
+        li.append(dic)
+    return str(li)
+  except:
+      return jsonify({"status": 404,"message": "coin/token not found"})
+
+
+@app.route('/crypto/quote/<name>',methods=['GET'])
+def getname(name):
+  try:
+    url="https://api.coinpaprika.com/v1/tickers/"
+    response=requests.get(url).json()
+    li=[]
+    for i in response:
+      if i['name']==name:
+        dic={'id':i["id"],'name':i["name"],'symbol':i["symbol"],'rank':i["rank"],"circulating_supply":i["circulating_supply"],"total_supply":i["total_supply"],"max_supply":i["max_supply"],"USD_price":i["quotes"]["USD"]["price"]}
+
+    return dic
+  except:
+        return jsonify({"status": 404,"message": "coin/token not found"})
+
+
+@app.route("/crypto/team/<name>",methods=["GET"]) 
+def getTeam(name):
+    try: 
+        response1=requests.get("https://api.coinpaprika.com/v1/coins"+"/crypto/team/"+name)                
+        response1=response1.json()        
+        return jsonify(response1)
+    except:
+        return jsonify({"status": 404,"message": "coin/token not found"})
+
+
 
 if __name__=='__main__':
   app.run(debug=True)
