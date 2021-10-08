@@ -11,7 +11,10 @@ app = Flask(__name__)
 pp = PrettyPrinter()
 
 apiKey = 'TidP7NUQAdecvBjagQBF1bC6PMPsETyV8BCDFPQm'
-@app.route('/nasa/image-of-month',methods=['GET','POST'])
+
+
+#--------------------------------------SECTION 1----------------------------------
+@app.route('/nasa/image-of-month',methods=['GET'])
 def task():
   URL_APOD = "https://api.nasa.gov/planetary/apod"
   date = '2021-10-01'
@@ -28,7 +31,7 @@ def task():
     js={"status": 404,"message": "image/video not found"}
     return js
 
-@app.route('/nasa/image-of-month/<year>/<month>')
+@app.route('/nasa/image-of-month/<year>/<month>',methods=['GET'])
 def task1(year,month):
   URL_APOD = "https://api.nasa.gov/planetary/apod"
   c=0
@@ -71,7 +74,7 @@ def task1(year,month):
     return js
 
 
-@app.route('/nasa/videos-of-month/<year>/<month>')
+@app.route('/nasa/videos-of-month/<year>/<month>',methods=['GET'])
 def task2(year,month):
   URL_APOD = "https://api.nasa.gov/planetary/apod"
   c=0
@@ -115,7 +118,7 @@ def task2(year,month):
     js={"status": 404,"message": "image/video not found"}
     return js
 
-@app.route('/nasa/earth-poly-image/<date>')
+@app.route('/nasa/earth-poly-image/<date>',methods=['GET'])
 def task3(date):
   URL_APOD = "https://epic.gsfc.nasa.gov/api/images.php"
   sdate = date
@@ -137,15 +140,15 @@ def task3(date):
     js={"status": 404,"message": "image/video not found"}
     return js
 
+#-------------------------------------------section 2-----------------------------------------
 
-
-@app.route('/weather/city/<name>')
+@app.route('/weather/city/<name>',methods=['GET'])
 def task4(name):
   try:
     BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
     API_KEY = "fb725cc2dc004d6ab823186d2c27fab1"
     # upadting the URL
-    URL_APOD = BASE_URL + "q=" + name + "&appid=" + API_KEY
+    URL_APOD = BASE_URL + "q=" + name + "&units=metric&appid=" + API_KEY
     # HTTP request
     response = requests.get(URL_APOD).json()
     #pp.pprint(response)
@@ -159,46 +162,37 @@ def task4(name):
     return js
 
 
-@app.route('/weather/search/<lat>/<lon>')
-def task5(lat,lon):
+@app.route('/weather/search/',methods=['GET'])
+def task5():
+  temp={}
+  API_KEY="fb725cc2dc004d6ab823186d2c27fab1"
   try:
-    BASE_URL = "http://api.openweathermap.org/data/2.5/weather?"
-    API_KEY = "0d8681b69560b5cdd6257184d3c7fc14"
-    # upadting the URL
-    URL_APOD = BASE_URL + "appid=" + API_KEY + "&lat=" + str(lat) + "&lon=" + str(lon)
-    # HTTP request
-    response = requests.get(URL_APOD).json()
-    #pp.pprint(response)
-    dic={'country':response['sys']['country'],'name':response['name'],'temp':response['main']['temp'],'min_temp':response['main']['temp_min'],'max_temp':response['main']['temp_max'],'latitude':response['coord']['lat'],'longitude':response['coord']['lon']}
-    return dic
+        q_Param=str(request.query_string)[2:]        
+        if(q_Param[0]=='p'):
+            key,val=map(str,q_Param.split('='))
+            val=val[:-1]            
+            response=requests.get("https://api.openweathermap.org/data/2.5/weather?zip="+val+",in&units=metric&appid="+API_KEY)        
+        else:
+            lat,lon=map(str,q_Param.split('&'))
+            latV=lat.split('=')[1]
+            lonV=lon.split('=')[1]
+            lonV=lonV[:-1]
+            response=requests.get("https://api.openweathermap.org/data/2.5/weather?lat="+latV+"&lon="+lonV+"&units=metric&appid="+API_KEY)        
+        response=response.json()      
+        temp['country']= response["sys"]["country"]
+        temp['name']=response["name"]
+        temp['temp']=response["main"]["temp"]
+        temp['min_temp']=response["main"]["temp_min"]
+        temp['max_temp']=response["main"]["temp_max"]
+        temp['latitude']=response["coord"]["lat"]
+        temp['longitude']=response["coord"]["lon"]
+        dic={"country":temp['country'],"name":temp['name'],"temp":temp['temp'],"min_temp":temp['min_temp'],"max_temp":temp['max_temp'],"latitude":temp['latitude'],"longitude":temp['longitude']}
+        return dic
   except:
-    js={
-    "status": 404,
-    "message": "weather data not found"
-    }
-    return js
+        js={"status": 404,"message": "weather data not found"}
+        return js
 
-@app.route('/weather/search/<pin_code>')
-def task6(pin_code):
-  try:
-    API_key = "0d8681b69560b5cdd6257184d3c7fc14"
-    base_url = "http://api.openweathermap.org/data/2.5/weather?"
-    
-    Final_url = base_url + "appid=" + API_key + "&zip=" + pin_code
-    
-    response = requests.get(Final_url).json()
-    
-    print("\nCurrent Weather Data Of " + pin_code +":\n")
-    dic={'country':response['sys']['country'],'name':response['name'],'temp':response['main']['temp'],'min_temp':response['main']['temp_min'],'max_temp':response['main']['temp_max'],'latitude':response['coord']['lat'],'longitude':response['coord']['lon']}
-    return dic
-  except:
-    js={
-    "status": 404,
-    "message": "weather data not found"
-    }
-    return js
-
-@app.route('/')
+@app.route('/',methods=['GET'])
 def start():
   js={"data":"codeCrunch21 -> 06-oct-21"}
   return js
